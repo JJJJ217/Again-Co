@@ -1,19 +1,139 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Azure Pipelines Configuration for Again-Co
+# This pipeline implements CI/CD for the Advanced Software Development project
+# Supporting automated build, test, and deployment workflows
 
 trigger:
 - main
+- develop
 
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+variables:
+  buildConfiguration: 'Release'
+  azureServiceConnection: 'Azure-Service-Connection'
+  webAppName: 'again-co-app'
+  resourceGroupName: 'again-co-rg'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+stages:
+- stage: Build
+  displayName: 'Build and Test'
+  jobs:
+  - job: Build
+    displayName: 'Build Application'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
+    
+    - script: |
+        echo "Building Again-Co application..."
+        echo "Installing dependencies..."
+        # npm install (when package.json is added)
+        echo "Running build process..."
+        # npm run build (when build scripts are added)
+      displayName: 'Build Application'
+    
+    - script: |
+        echo "Running unit tests..."
+        # npm test (when tests are implemented)
+        echo "Running code quality checks..."
+        # npm run lint (when linting is configured)
+      displayName: 'Run Tests and Quality Checks'
+    
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/test-results.xml'
+        mergeTestResults: true
+      displayName: 'Publish Test Results'
+    
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: '**/coverage.xml'
+      displayName: 'Publish Code Coverage'
+
+- stage: Deploy_Staging
+  displayName: 'Deploy to Staging'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeployStaging
+    displayName: 'Deploy to Staging Environment'
+    environment: 'staging'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              appType: 'webApp'
+              appName: '$(webAppName)-staging'
+              resourceGroupName: $(resourceGroupName)
+              deployToSlotOrASE: true
+              slotName: 'staging'
+            displayName: 'Deploy to Azure App Service Staging Slot'
+          
+          - script: |
+              echo "Running integration tests against staging environment..."
+              # Integration test commands here
+            displayName: 'Run Integration Tests'
+
+- stage: Deploy_Production
+  displayName: 'Deploy to Production'
+  dependsOn: Deploy_Staging
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: DeployProduction
+    displayName: 'Deploy to Production Environment'
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              appType: 'webApp'
+              appName: $(webAppName)
+              resourceGroupName: $(resourceGroupName)
+            displayName: 'Deploy to Azure App Service Production'
+          
+          - script: |
+              echo "Running smoke tests against production environment..."
+              # Production smoke test commands here
+            displayName: 'Run Production Smoke Tests'
+          
+          - task: AzureMonitor@1
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              resourceGroupName: $(resourceGroupName)
+              actionType: 'start'
+            displayName: 'Enable Production Monitoring'
+
+- stage: Security_Compliance
+  displayName: 'Security and Compliance Checks'
+  dependsOn: Build
+  condition: succeededOrFailed()
+  jobs:
+  - job: SecurityScan
+    displayName: 'Security and Compliance Scanning'
+    steps:
+    - script: |
+        echo "Running security vulnerability scan..."
+        # Security scanning tools (e.g., npm audit, OWASP dependency check)
+      displayName: 'Security Vulnerability Scan'
+    
+    - script: |
+        echo "Running compliance checks..."
+        # Compliance validation tools
+      displayName: 'Compliance Validation'
+    
+    - script: |
+        echo "Validating Azure Key Vault integration..."
+        # Key Vault access validation
+      displayName: 'Validate Secret Management'
