@@ -1,9 +1,4 @@
 <?php
-/**
- * Forgot Password Page
- * Implements F103 - Password Reset functionality
- * Story 106: Request password reset
- */
 
 require_once '../../includes/init.php';
 

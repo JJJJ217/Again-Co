@@ -1,9 +1,5 @@
 <?php
 /**
- * Common utility functions for E-Vinty application
- */
-
-/**
  * Sanitize input data
  */
 function sanitizeInput($data) {

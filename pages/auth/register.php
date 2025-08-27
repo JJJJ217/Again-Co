@@ -1,9 +1,4 @@
 <?php
-/**
- * User Registration Page
- * Implements F101 - Registration functionality
- * Story 101: Staff/Admin registration with email
- */
 
 require_once '../../includes/init.php';
 
@@ -145,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $redirect_url = SITE_URL . '/pages/user/profile.php';
             }
             
-            redirectWithMessage($redirect_url, 'Account created successfully! Welcome to E-Vinty.', 'success');
+            redirectWithMessage($redirect_url, 'Account created successfully! Welcome to Again & Co.', 'success');
             
         } catch (Exception $e) {
             $db->connect()->rollBack();
@@ -155,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$page_title = "Create Account - E-Vinty";
+$page_title = "Create Account - Again & Co";
 ?>
 
 <!DOCTYPE html>
@@ -174,7 +169,7 @@ $page_title = "Create Account - E-Vinty";
             <div class="card" style="max-width: 600px; margin: 0 auto;">
                 <div class="card-header">
                     <h1 class="card-title">Create Your Account</h1>
-                    <p>Join E-Vinty and start shopping for unique vintage items</p>
+                    <p>Join Again & Co and start shopping for unique vintage items</p>
                 </div>
                 
                 <?php if (!empty($errors['general'])): ?>

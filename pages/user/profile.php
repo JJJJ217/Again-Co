@@ -1,9 +1,5 @@
 <?php
-/**
- * User Profile Management Page
- * Implements F102 - Profile Management functionality
- * Stories 201-205: Account management features
- */
+
 
 require_once '../../includes/init.php';
 

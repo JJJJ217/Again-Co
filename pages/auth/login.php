@@ -1,10 +1,4 @@
 <?php
-/**
- * User Login Page
- * Implements F101 - Login functionality
- * Story 102: Login with email and password
- * Story 103: Role-based system recognition
- */
 
 require_once '../../includes/init.php';
 
@@ -90,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         // Redirect based on user role
                         $redirect_url = SITE_URL;
-                        $message = 'Welcome back to E-Vinty!';
+                        $message = 'Welcome back to Again & Co!';
                         
                         // Check for redirect parameter
                         if (isset($_GET['redirect']) && !empty($_GET['redirect'])) {
@@ -172,7 +166,7 @@ $page_title = "Login - E-Vinty";
             <div class="card" style="max-width: 450px; margin: 0 auto;">
                 <div class="card-header">
                     <h1 class="card-title">Login to Your Account</h1>
-                    <p>Welcome back to E-Vinty</p>
+                    <p>Welcome back to Again & Co</p>
                 </div>
                 
                 <?php if ($logout_message): ?>

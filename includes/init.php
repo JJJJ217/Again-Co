@@ -1,8 +1,4 @@
 <?php
-/**
- * Application Bootstrap
- * Initialize the application and load required files
- */
 
 // Start output buffering
 ob_start();

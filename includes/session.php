@@ -1,8 +1,4 @@
 <?php
-/**
- * Session Management Functions
- * Handles user authentication and session security
- */
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {

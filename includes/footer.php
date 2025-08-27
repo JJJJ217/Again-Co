@@ -9,9 +9,9 @@
     <div class="container">
         <div class="footer-content">
             <div class="footer-section">
-                <h3>E-Vinty</h3>
+                <h3>Again & Co</h3>
                 <p>Your destination for quality vintage items. Discover unique pieces with character and style.</p>
-                <p>&copy; <?= date('Y') ?> E-Vinty - Again&Co. All rights reserved.</p>
+                <p>&copy; <?= date('Y') ?> Again & Co. All rights reserved.</p>
             </div>
             
             <div class="footer-section">

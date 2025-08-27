@@ -1,8 +1,4 @@
 <?php
-/**
- * Site Header
- * Navigation and user authentication status
- */
 
 $current_user = getCurrentUser();
 ?>
@@ -11,7 +7,7 @@ $current_user = getCurrentUser();
     <div class="container">
         <div class="header-top">
             <a href="<?= SITE_URL ?>" class="logo">
-                E-Vinty
+                Again & Co
             </a>
             
             <div class="user-menu">

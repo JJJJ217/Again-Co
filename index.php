@@ -1,6 +1,6 @@
 <?php
 /**
- * E-Vinty Homepage
+ * Again & Co Homepage
  * Main landing page for the e-commerce website
  */
 
@@ -16,8 +16,8 @@ try {
     error_log("Failed to fetch featured products: " . $e->getMessage());
 }
 
-$page_title = "Welcome to E-Vinty - Again&Co Vintage Collection";
-$page_description = "Discover unique vintage items at E-Vinty. Quality pre-owned fashion, accessories, and collectibles from Again&Co.";
+$page_title = "Welcome to Again & Co - Vintage Collection";
+$page_description = "Discover unique vintage items at Again & Co. Quality pre-owned fashion, accessories, and collectibles.";
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +47,7 @@ $page_description = "Discover unique vintage items at E-Vinty. Quality pre-owned
             <section class="hero-section">
                 <div class="card">
                     <div class="hero-content text-center">
-                        <h1 class="hero-title">Welcome to E-Vinty</h1>
+                        <h1 class="hero-title">Welcome to Again & Co</h1>
                         <p class="hero-subtitle">Discover unique vintage treasures from Again&Co</p>
                         <p class="hero-description">
                             Quality pre-owned fashion, accessories, and collectibles. 

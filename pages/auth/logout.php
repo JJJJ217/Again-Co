@@ -1,9 +1,4 @@
 <?php
-/**
- * User Logout
- * Implements F101 - Logout functionality
- * Story 104: Log out of account
- */
 
 require_once '../../includes/init.php';
 
