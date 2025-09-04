@@ -1,3 +1,2 @@
 # Again-Co
-This is a UTS group project for Advanced Software Development
-Test
+This is a UTS group project for Advanced Software Development. This project is build on PHP with javascript, html and css.
