@@ -4,7 +4,9 @@
 # https://aka.ms/yaml
 
 trigger:
-- main
+  branches:
+    include:
+      - feature/Eric
 
 pool:
   vmImage: ubuntu-latest
@@ -18,7 +20,3 @@ steps:
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
 
-trigger:
-  branches:
-    include:
-      - feature/Eric
