@@ -267,6 +267,27 @@ $page_title = "Shopping Cart - Again&Co";
                 </div>
             <?php endif; ?>
             
+            <?php 
+            // Show order success message if cart is empty and order was just placed
+            if (empty($cart_items) && isset($_SESSION['order_success'])): ?>
+                <div class="alert alert-success" style="background: linear-gradient(135deg, #28a745, #20c997); border: none; color: white; padding: 2rem; border-radius: 10px; margin-bottom: 2rem; text-align: center; font-size: 1.2rem; font-weight: 600; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">Order Placed Successfully!</div>
+                    <div><?= htmlspecialchars($_SESSION['order_success']['message']) ?></div>
+                    <div style="font-size: 1rem; margin-top: 1rem; opacity: 0.9;">
+                        Your cart is now empty and your order is being processed.
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <a href="../user/orders.php" class="btn btn-light" style="margin-right: 1rem;">View My Orders</a>
+                        <a href="../products/catalog.php" class="btn btn-light">Continue Shopping</a>
+                    </div>
+                </div>
+                <?php 
+                // Clear the success message after displaying it
+                unset($_SESSION['order_success']); 
+                ?>
+            <?php endif; ?>
+            
             <div class="card">
                 <div class="card-header">
                     <h1 class="card-title">Shopping Cart</h1>
@@ -587,6 +608,56 @@ $page_title = "Shopping Cart - Again&Co";
                 }
             }
         });
+        
+        // Show toast notification for order success
+        <?php if (isset($_SESSION['order_success']) && empty($cart_items)): ?>
+        window.addEventListener('load', function() {
+            showToast('🎉 Order Placed Successfully!', 'Your order #<?= $_SESSION['order_success']['order_id'] ?> has been confirmed and is being processed!', 'success');
+        });
+        <?php endif; ?>
+        
+        // Toast notification function
+        function showToast(title, message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                color: white;
+                padding: 1.5rem 2rem;
+                border-radius: 10px;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+                z-index: 10000;
+                min-width: 350px;
+                max-width: 500px;
+                transform: translateX(600px);
+                transition: transform 0.4s ease;
+                font-family: Arial, sans-serif;
+            `;
+            toast.innerHTML = `
+                <div style="font-weight: 700; margin-bottom: 0.5rem; font-size: 1.1rem;">${title}</div>
+                <div style="font-size: 1rem; opacity: 0.95; line-height: 1.4;">${message}</div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto hide after 6 seconds
+            setTimeout(() => {
+                toast.style.transform = 'translateX(600px)';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 400);
+            }, 6000);
+        }
     </script>
 </body>
 </html>

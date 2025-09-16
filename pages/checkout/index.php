@@ -219,12 +219,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $db->commit();
                     
                     // Set success flash message
-                    setFlashMessage('Order placed successfully! Thank you for your purchase.', 'success');
+                    setFlashMessage('🎉 Order placed successfully! Thank you for your purchase.', 'success');
+                    
+                    // Also set a session variable for additional confirmation
+                    $_SESSION['order_success'] = [
+                        'message' => 'Your order #' . $order_id . ' has been placed successfully!',
+                        'order_id' => $order_id,
+                        'timestamp' => time()
+                    ];
+                    
+                    // Debug: Log the redirect
+                    error_log("Order placed successfully. Redirecting to thank you page. Order ID: " . $order_id);
                     
                     // Clear checkout session
                     unset($_SESSION['checkout']);
                     
-                    header('Location: ?step=confirmation&order_id=' . $order_id);
+                    header('Location: thank-you.php?order_id=' . $order_id);
                     exit;
                 } else {
                     $db->rollback();
@@ -933,6 +943,25 @@ $page_title = "Checkout - Again&Co";
                 <?php endif; ?>
                 
                 <?php if ($step === 'confirmation' && $order): ?>
+                    <!-- Success Alert Banner -->
+                    <?php if (isset($_SESSION['order_success'])): ?>
+                        <div class="alert alert-success" style="background: linear-gradient(135deg, #28a745, #20c997); border: none; color: white; padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem; text-align: center; font-size: 1.2rem; font-weight: 600; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎉</div>
+                            <div><?= htmlspecialchars($_SESSION['order_success']['message']) ?></div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">
+                                Your order is now being processed and you'll receive updates via email.
+                            </div>
+                        </div>
+                        <?php 
+                        // Clear the success message after displaying it
+                        unset($_SESSION['order_success']); 
+                        ?>
+                    <?php else: ?>
+                        <div class="alert alert-success" style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; text-align: center; font-size: 1.1rem; font-weight: 600;">
+                            🎉 Your order has been confirmed!
+                        </div>
+                    <?php endif; ?>
+                    
                     <!-- Order Confirmation -->
                     <div class="confirmation-container">
                         <div class="confirmation-content">
@@ -1151,6 +1180,52 @@ $page_title = "Checkout - Again&Co";
                 }
             }
         });
+        
+        // Show toast notification for order success
+        <?php if (isset($_SESSION['order_success']) && $step === 'confirmation'): ?>
+        window.addEventListener('load', function() {
+            showToast('🎉 Order Placed Successfully!', 'Your order #<?= $_SESSION['order_success']['order_id'] ?> has been confirmed!', 'success');
+        });
+        <?php endif; ?>
+        
+        // Toast notification function
+        function showToast(title, message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                min-width: 300px;
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+            `;
+            toast.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">${title}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">${message}</div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                toast.style.transform = 'translateX(400px)';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 5000);
+        }
     </script>
 </body>
 </html>
