@@ -666,6 +666,7 @@ $page_title = "Checkout - Again&Co";
                                                     <option value="US" <?= ($_SESSION['checkout']['shipping_address']['country'] ?? '') === 'US' ? 'selected' : '' ?>>United States</option>
                                                     <option value="CA" <?= ($_SESSION['checkout']['shipping_address']['country'] ?? '') === 'CA' ? 'selected' : '' ?>>Canada</option>
                                                     <option value="UK" <?= ($_SESSION['checkout']['shipping_address']['country'] ?? '') === 'UK' ? 'selected' : '' ?>>United Kingdom</option>
+                                                    <option value="AU" <?= ($_SESSION['checkout']['shipping_address']['country'] ?? '') === 'AU' ? 'selected' : '' ?>>Australia</option>
                                                 </select>
                                             </div>
                                         </div>
