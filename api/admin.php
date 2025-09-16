@@ -11,7 +11,7 @@ require_once '../includes/init.php';
 header('Content-Type: application/json');
 
 // Require admin access for all operations
-if (!isLoggedIn() || !hasRole(['admin', 'staff'])) {
+if (!isLoggedIn() || !in_array(getCurrentUser()['role'] ?? '', ['admin', 'staff'])) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Access denied']);
     exit;

@@ -31,7 +31,7 @@ try {
     // Order statistics
     $stats['total_orders'] = $db->fetch("SELECT COUNT(*) as count FROM orders")['count'];
     $stats['pending_orders'] = $db->fetch(
-        "SELECT COUNT(*) as count FROM orders WHERE order_status = 'pending'"
+        "SELECT COUNT(*) as count FROM orders WHERE status = 'pending'"
     )['count'];
     $stats['todays_orders'] = $db->fetch(
         "SELECT COUNT(*) as count FROM orders WHERE DATE(created_at) = CURDATE()"
@@ -39,16 +39,16 @@ try {
     
     // Revenue statistics
     $stats['total_revenue'] = $db->fetch(
-        "SELECT COALESCE(SUM(total_amount), 0) as total FROM orders WHERE order_status = 'confirmed'"
+        "SELECT COALESCE(SUM(total_price), 0) as total FROM orders WHERE status = 'confirmed'"
     )['total'];
     $stats['todays_revenue'] = $db->fetch(
-        "SELECT COALESCE(SUM(total_amount), 0) as total FROM orders 
-         WHERE order_status = 'confirmed' AND DATE(created_at) = CURDATE()"
+        "SELECT COALESCE(SUM(total_price), 0) as total FROM orders 
+         WHERE status = 'confirmed' AND DATE(created_at) = CURDATE()"
     )['total'];
     
     // Recent orders
     $recent_orders = $db->fetchAll(
-        "SELECT o.*, u.first_name, u.last_name, u.email 
+        "SELECT o.*, u.name, u.email 
          FROM orders o 
          JOIN users u ON o.user_id = u.user_id 
          ORDER BY o.created_at DESC 
@@ -405,7 +405,7 @@ $page_title = "Admin Dashboard - Again&Co";
         <main class="admin-content">
             <div class="dashboard-header">
                     <h1>Admin Dashboard - Again&Co</h1>
-                <p>Welcome back, <?= htmlspecialchars($user['first_name']) ?>! Here's what's happening with your store.</p>
+                <p>Welcome back, <?= htmlspecialchars($user['name'] ?? 'Admin') ?>! Here's what's happening with your store.</p>
             </div>
             
             <!-- Dashboard Statistics -->
@@ -459,15 +459,15 @@ $page_title = "Admin Dashboard - Again&Co";
                                     <div class="order-info">
                                         <div class="order-id">#<?= str_pad($order['order_id'], 6, '0', STR_PAD_LEFT) ?></div>
                                         <div class="order-customer">
-                                            <?= htmlspecialchars($order['first_name'] . ' ' . $order['last_name']) ?>
+                                            <?= htmlspecialchars($order['name'] ?? 'Unknown Customer') ?>
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="order-status <?= $order['order_status'] ?>">
-                                            <?= ucfirst($order['order_status']) ?>
+                                        <div class="order-status <?= $order['status'] ?>">
+                                            <?= ucfirst($order['status']) ?>
                                         </div>
                                         <div style="font-size: 0.875rem; color: #7f8c8d; margin-top: 0.25rem;">
-                                            <?= formatCurrency($order['total_amount']) ?>
+                                            $<?= number_format($order['total_price'], 2) ?>
                                         </div>
                                     </div>
                                 </div>

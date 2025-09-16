@@ -31,81 +31,79 @@ try {
     $params = [];
     
     if (!empty($search)) {
-        $where_conditions[] = "(p.product_name LIKE ? OR p.description LIKE ? OR p.brand LIKE ?)";
+        $where_conditions[] = "(product_name LIKE ? OR description LIKE ? OR brand LIKE ?)";
         $search_term = "%{$search}%";
         $params = array_merge($params, [$search_term, $search_term, $search_term]);
     }
     
     if (!empty($category)) {
-        $where_conditions[] = "p.category = ?";
+        $where_conditions[] = "category = ?";
         $params[] = $category;
     }
     
     switch ($filter) {
         case 'low_stock':
-            $where_conditions[] = "p.stock <= 5";
+            $where_conditions[] = "stock <= 5 AND is_active = 1";
             break;
         case 'out_of_stock':
-            $where_conditions[] = "p.stock = 0";
+            $where_conditions[] = "stock = 0 AND is_active = 1";
             break;
         case 'inactive':
-            $where_conditions[] = "p.is_active = 0";
+            $where_conditions[] = "is_active = 0";
             break;
         case 'active':
+            $where_conditions[] = "is_active = 1";
+            break;
+        case 'all':
         default:
-            $where_conditions[] = "p.is_active = 1";
+            // Show all products by default
             break;
     }
     
     $where_clause = !empty($where_conditions) ? "WHERE " . implode(" AND ", $where_conditions) : "";
     
     // Get total count for pagination
-    $count_query = "SELECT COUNT(*) as total FROM products p {$where_clause}";
+    $count_query = "SELECT COUNT(*) as total FROM products {$where_clause}";
     $count_result = $db->fetch($count_query, $params);
     $total_products = $count_result['total'];
     
     // Build sort clause
-    $sort_clause = "p.created_at DESC";
+    $sort_clause = "created_at DESC";
     switch ($sort) {
         case 'name':
-            $sort_clause = "p.product_name ASC";
+            $sort_clause = "product_name ASC";
             break;
         case 'price_low':
-            $sort_clause = "p.price ASC";
+            $sort_clause = "price ASC";
             break;
         case 'price_high':
-            $sort_clause = "p.price DESC";
+            $sort_clause = "price DESC";
             break;
         case 'stock_low':
-            $sort_clause = "p.stock ASC";
+            $sort_clause = "stock ASC";
             break;
         case 'stock_high':
-            $sort_clause = "p.stock DESC";
+            $sort_clause = "stock DESC";
             break;
         case 'oldest':
-            $sort_clause = "p.created_at ASC";
+            $sort_clause = "created_at ASC";
             break;
         case 'newest':
         default:
-            $sort_clause = "p.created_at DESC";
+            $sort_clause = "created_at DESC";
             break;
     }
     
-    // Get products
-    $products_query = "
-        SELECT p.*, 
-               COUNT(oi.order_item_id) as total_sold,
-               COALESCE(AVG(r.rating), 0) as avg_rating,
-               COUNT(r.review_id) as review_count
-        FROM products p
-        LEFT JOIN order_items oi ON p.product_id = oi.product_id
-        LEFT JOIN reviews r ON p.product_id = r.product_id
-        {$where_clause}
-        GROUP BY p.product_id
-        ORDER BY {$sort_clause}
-        LIMIT {$per_page} OFFSET {$offset}";
-    
-    $products = $db->fetchAll($products_query, $params);
+    // Get products - simplified query for testing
+    try {
+        // Use the filtered query with corrected column names
+        $products_query = "SELECT * FROM products {$where_clause} ORDER BY {$sort_clause} LIMIT {$per_page} OFFSET {$offset}";
+        $products = $db->fetchAll($products_query, $params);
+        
+    } catch (Exception $e) {
+        error_log("Error in products query: " . $e->getMessage());
+        $products = [];
+    }
     
     // Get categories for filter dropdown
     $categories = $db->fetchAll(
@@ -484,6 +482,18 @@ $page_title = "Product Management - Again&Co";
         
         <!-- Admin Content -->
         <main class="admin-content">
+            <?php if (isset($_GET['message'])): ?>
+                <div class="alert alert-success" style="margin-bottom: 1.5rem;">
+                    <?= htmlspecialchars($_GET['message']) ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (isset($_GET['error'])): ?>
+                <div class="alert alert-error" style="margin-bottom: 1.5rem;">
+                    <?= htmlspecialchars($_GET['error']) ?>
+                </div>
+            <?php endif; ?>
+            
             <div class="products-header">
                 <div>
                     <h1>Product Management</h1>
@@ -523,6 +533,7 @@ $page_title = "Product Management - Again&Co";
                         <div class="filter-group">
                             <label for="filter">Filter</label>
                             <select id="filter" name="filter">
+                                <option value="" <?= $filter === '' ? 'selected' : '' ?>>All Products</option>
                                 <option value="active" <?= $filter === 'active' ? 'selected' : '' ?>>Active Products</option>
                                 <option value="inactive" <?= $filter === 'inactive' ? 'selected' : '' ?>>Inactive Products</option>
                                 <option value="low_stock" <?= $filter === 'low_stock' ? 'selected' : '' ?>>Low Stock</option>
@@ -568,6 +579,7 @@ $page_title = "Product Management - Again&Co";
             </div>
             
             <!-- Products Table -->
+            
             <?php if (!empty($products)): ?>
                 <div class="products-table">
                     <form id="bulk-form">
@@ -583,8 +595,7 @@ $page_title = "Product Management - Again&Co";
                                     <th>Price</th>
                                     <th>Stock</th>
                                     <th>Status</th>
-                                    <th>Sales</th>
-                                    <th>Rating</th>
+                                    <th>Created</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -616,7 +627,7 @@ $page_title = "Product Management - Again&Co";
                                                 </div>
                                                 <div class="product-meta">
                                                     <?= htmlspecialchars($product['brand']) ?> • 
-                                                    <?= getConditionText($product['condition_rating']) ?>
+                                                    <?= ucfirst($product['condition_type'] ?? 'good') ?>
                                                 </div>
                                             </div>
                                         </td>
@@ -656,11 +667,7 @@ $page_title = "Product Management - Again&Co";
                                                 <?= $product['is_active'] ? 'Active' : 'Inactive' ?>
                                             </span>
                                         </td>
-                                        <td><?= number_format($product['total_sold']) ?></td>
-                                        <td>
-                                            <?= generateStarRating($product['avg_rating']) ?>
-                                            <small>(<?= $product['review_count'] ?>)</small>
-                                        </td>
+                                        <td><?= date('M j, Y', strtotime($product['created_at'])) ?></td>
                                         <td>
                                             <div class="product-actions">
                                                 <a href="edit.php?id=<?= $product['product_id'] ?>" 
