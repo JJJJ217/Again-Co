@@ -18,7 +18,7 @@ $cart_count = 0;
 try {
     // Get cart items
     $cart_items = $db->fetchAll(
-        "SELECT c.*, p.product_name, p.price, p.image_url, p.stock, p.category,
+        "SELECT c.*, p.product_name, p.description, p.price, p.image_url, p.stock, p.category,
                 (c.quantity * p.price) as item_total
          FROM shopping_cart c
          JOIN products p ON c.product_id = p.product_id
@@ -128,21 +128,59 @@ $page_title = "Shopping Cart - Again&Co";
         }
         
         .quantity-btn {
-            width: 35px;
-            height: 35px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 5px;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #3498db;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
         }
         
         .quantity-btn:hover {
-            background-color: #f8f9fa;
-            border-color: #3498db;
+            background: linear-gradient(135deg, #2980b9, #1f5582);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .quantity-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+        }
+        
+        .remove-item {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+        }
+        
+        .remove-item:hover {
+            background: linear-gradient(135deg, #c0392b, #922b21);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+        
+        .remove-item:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
         }
         
         .quantity-input {
@@ -159,18 +197,46 @@ $page_title = "Shopping Cart - Again&Co";
             color: #2c3e50;
         }
         
-        .remove-item {
-            background: none;
+        /* Description Feature Styles */
+        .description-toggle {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
             border: none;
-            color: #e74c3c;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 1.5rem;
-            padding: 0.5rem;
-            border-radius: 5px;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(155, 89, 182, 0.2);
         }
         
-        .remove-item:hover {
-            background-color: #f8d7da;
+        .description-toggle:hover {
+            background: linear-gradient(135deg, #8e44ad, #7d3c98);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(155, 89, 182, 0.3);
+        }
+        
+        .product-description {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            display: none;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #495057;
+        }
+        
+        .product-description.show {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .cart-summary {
@@ -211,6 +277,46 @@ $page_title = "Shopping Cart - Again&Co";
         
         .continue-shopping {
             margin-top: 2rem;
+        }
+        
+        /* Enhanced Cart Action Buttons */
+        .cart-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .cart-actions .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            justify-content: center;
+            min-width: 150px;
+        }
+        
+        .cart-actions .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+        }
+        
+        .cart-actions .btn-secondary:hover {
+            background: linear-gradient(135deg, #495057, #343a40);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+        }
+        
+        #clear-cart:hover {
+            background: linear-gradient(135deg, #dc3545, #c82333) !important;
         }
         
         @media (max-width: 768px) {
@@ -325,6 +431,20 @@ $page_title = "Shopping Cart - Again&Co";
                                             <div class="cart-item-price">
                                                 <?= formatCurrency($item['price']) ?> each
                                             </div>
+                                            
+                                            <!-- Description Toggle Button -->
+                                            <?php if (!empty($item['description'])): ?>
+                                                <button type="button" 
+                                                        class="description-toggle" 
+                                                        data-product-id="<?= $item['product_id'] ?>">
+                                                    👁️ View Description
+                                                </button>
+                                                
+                                                <!-- Hidden Description -->
+                                                <div class="product-description" id="desc-<?= $item['product_id'] ?>">
+                                                    <?= nl2br(htmlspecialchars($item['description'])) ?>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                         
                                         <!-- Quantity Controls -->
@@ -362,10 +482,10 @@ $page_title = "Shopping Cart - Again&Co";
                             <!-- Cart Actions -->
                             <div class="cart-actions mt-3">
                                 <button type="button" class="btn btn-secondary" id="clear-cart">
-                                    Clear Cart
+                                    🗑️ Clear Cart
                                 </button>
                                 <a href="../products/catalog.php" class="btn btn-secondary">
-                                    Continue Shopping
+                                    🛍️ Continue Shopping
                                 </a>
                             </div>
                         </div>
@@ -586,6 +706,20 @@ $page_title = "Shopping Cart - Again&Co";
             
             if (event.target.id === 'clear-cart') {
                 clearCart();
+            }
+            
+            // Handle description toggle
+            if (event.target.classList.contains('description-toggle')) {
+                const descElement = document.getElementById(`desc-${productId}`);
+                const button = event.target;
+                
+                if (descElement.classList.contains('show')) {
+                    descElement.classList.remove('show');
+                    button.innerHTML = '👁️ View Description';
+                } else {
+                    descElement.classList.add('show');
+                    button.innerHTML = '🙈 Hide Description';
+                }
             }
         });
         
