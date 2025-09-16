@@ -446,4 +446,15 @@ function getCartCount() {
         return 0;
     }
 }
+
+/**
+ * Check if user has admin or staff privileges
+ */
+function isAdmin() {
+    return isLoggedIn() && $_SESSION['user_role'] === 'admin';
+}
+
+function isStaff() {
+    return isLoggedIn() && ($_SESSION['user_role'] === 'staff' || $_SESSION['user_role'] === 'admin');
+}
 ?>
