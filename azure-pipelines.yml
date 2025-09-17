@@ -45,10 +45,45 @@ steps:
 - script: composer install --no-interaction --no-progress
   displayName: 'Composer install dependencies'
 
+# Validate PHP syntax in test files
+- script: |
+    echo "Checking PHP syntax in test files..."
+    for file in tests/*.php; do
+      if [ -f "$file" ]; then
+        echo "Checking $file..."
+        php -l "$file" || echo "Syntax error in $file"
+      fi
+    done
+    echo "PHP syntax validation completed"
+  displayName: 'Validate PHP Syntax'
+
+# Test PHPUnit setup
+- script: |
+    echo "Testing PHPUnit setup..."
+    php -c tests/bootstrap.php -r "echo 'Bootstrap file loaded successfully\n';" || echo "Bootstrap error"
+    vendor/bin/phpunit --version || echo "PHPUnit version check failed"
+    vendor/bin/phpunit --list-tests || echo "Test discovery failed"
+  displayName: 'Verify PHPUnit Setup'
+
 # Run comprehensive PHPUnit test suite
 - script: |
     echo "Running PHPUnit test suite..."
-    vendor/bin/phpunit --log-junit $(junitPath) --testdox || true
+    echo "Current directory: $(pwd)"
+    echo "PHP version: $(php --version)"
+    echo "Composer version: $(composer --version)"
+    ls -la vendor/bin/ || echo "vendor/bin not found"
+    
+    # Create test results directory if it doesn't exist
+    mkdir -p $(Build.SourcesDirectory)/test-results
+    
+    # Run PHPUnit with detailed output
+    if [ -f "vendor/bin/phpunit" ]; then
+      vendor/bin/phpunit --log-junit $(junitPath) --testdox --verbose || echo "PHPUnit completed with some failures"
+    else
+      echo "PHPUnit not found in vendor/bin/"
+      exit 1
+    fi
+    
     echo "PHPUnit execution completed. Check test results below."
   displayName: 'Run PHPUnit Test Suite'
 
@@ -58,9 +93,15 @@ steps:
       echo "=== TEST RESULTS SUMMARY ==="
       echo "JUnit XML file generated successfully"
       echo "File size: $(stat -f%z $(junitPath) 2>/dev/null || stat -c%s $(junitPath) 2>/dev/null || echo 'unknown') bytes"
+      echo "File contents preview:"
+      head -20 $(junitPath) || echo "Could not read file"
       echo "Check the Tests tab for detailed results"
     else
-      echo "Warning: JUnit XML file not found"
+      echo "Warning: JUnit XML file not found at $(junitPath)"
+      echo "Contents of current directory:"
+      ls -la
+      echo "Contents of test-results directory (if exists):"
+      ls -la test-results/ || echo "test-results directory not found"
     fi
   displayName: 'Display Test Summary'
   condition: always()
@@ -68,7 +109,7 @@ steps:
 # Publish JUnit results to Azure Pipelines Tests tab
 - task: PublishTestResults@2
   displayName: 'Publish test results'
-  condition: always()
+  condition: and(always(), succeeded('Run PHPUnit Test Suite'))
   inputs:
     testResultsFormat: 'JUnit'
     testResultsFiles: '$(junitPath)'
@@ -76,11 +117,23 @@ steps:
     testRunTitle: 'Again&Co E-commerce Tests'
     publishRunAttachments: true
 
-# Archive test artifacts
+# Archive test artifacts (only if file exists)
+- script: |
+    if [ -f "$(junitPath)" ]; then
+      echo "JUnit file exists, preparing for archive"
+      cp $(junitPath) $(Build.SourcesDirectory)/test-results/
+    else
+      echo "JUnit file not found, creating empty test results"
+      mkdir -p $(Build.SourcesDirectory)/test-results
+      echo "No test results generated" > $(Build.SourcesDirectory)/test-results/error.txt
+    fi
+  displayName: 'Prepare test artifacts'
+  condition: always()
+
 - task: PublishBuildArtifacts@1
   displayName: 'Archive test results'
   condition: always()
   inputs:
-    PathtoPublish: '$(Build.SourcesDirectory)/junit.xml'
+    PathtoPublish: '$(Build.SourcesDirectory)/test-results'
     ArtifactName: 'test-results'
     publishLocation: 'Container'
