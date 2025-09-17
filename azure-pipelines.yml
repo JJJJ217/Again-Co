@@ -18,7 +18,7 @@ pool:
 
 variables:
   phpVersion: '8.2'
-  junitPath: '$(Build.SourcesDirectory)/junit.xml'
+  junitFile: 'test-results.xml'
 
 steps:
 - checkout: self
@@ -59,45 +59,97 @@ steps:
 
 # Test PHPUnit setup
 - script: |
-    echo "Testing PHPUnit setup..."
-    php -c tests/bootstrap.php -r "echo 'Bootstrap file loaded successfully\n';" || echo "Bootstrap error"
-    vendor/bin/phpunit --version || echo "PHPUnit version check failed"
-    vendor/bin/phpunit --list-tests || echo "Test discovery failed"
+    echo "=== PHPUnit Setup Verification ==="
+    
+    # Test bootstrap file
+    echo "Testing bootstrap file..."
+    php tests/bootstrap.php && echo "✓ Bootstrap loaded successfully" || echo "✗ Bootstrap failed"
+    
+    # Verify PHPUnit installation
+    echo "Verifying PHPUnit installation..."
+    vendor/bin/phpunit --version && echo "✓ PHPUnit available" || echo "✗ PHPUnit not available"
+    
+    # Test discovery
+    echo "Testing test discovery..."
+    vendor/bin/phpunit --list-tests && echo "✓ Tests discovered" || echo "✗ Test discovery failed"
+    
+    # Try running just the basic test
+    echo "Testing basic test execution..."
+    vendor/bin/phpunit tests/BasicTest.php --verbose && echo "✓ Basic test passed" || echo "✗ Basic test failed"
+    
   displayName: 'Verify PHPUnit Setup'
 
 # Run comprehensive PHPUnit test suite
 - script: |
-    echo "Running PHPUnit test suite..."
+    echo "=== PHPUnit Test Execution ==="
     echo "Current directory: $(pwd)"
     echo "PHP version: $(php --version)"
-    echo "Composer version: $(composer --version)"
-    ls -la vendor/bin/ || echo "vendor/bin not found"
     
-    # Create test results directory if it doesn't exist
-    mkdir -p $(Build.SourcesDirectory)/test-results
-    
-    # Run PHPUnit with detailed output
+    # Check if vendor/bin/phpunit exists
     if [ -f "vendor/bin/phpunit" ]; then
-      vendor/bin/phpunit --log-junit $(junitPath) --testdox --verbose || echo "PHPUnit completed with some failures"
+      echo "✓ PHPUnit found at vendor/bin/phpunit"
+      vendor/bin/phpunit --version
     else
-      echo "PHPUnit not found in vendor/bin/"
+      echo "✗ PHPUnit not found in vendor/bin/"
+      ls -la vendor/bin/ || echo "vendor/bin directory not found"
       exit 1
     fi
     
-    echo "PHPUnit execution completed. Check test results below."
+    # Ensure we have a clean environment
+    rm -f junit.xml
+    rm -f $(junitFile)
+    
+    # Show test files that will be executed
+    echo "Test files to be executed:"
+    find tests -name "*.php" -type f | head -10
+    
+    echo "=== Starting PHPUnit Execution ==="
+    # Run PHPUnit with explicit output and better error handling
+    vendor/bin/phpunit \
+      --configuration phpunit.xml \
+      --log-junit $(junitFile) \
+      --testdox \
+      --verbose || {
+        echo "PHPUnit execution completed with some failures (exit code $?)"
+        echo "Checking if any test results were generated..."
+        
+        if [ ! -f "$(junitFile)" ]; then
+          echo "Creating fallback JUnit XML file..."
+          cat > $(junitFile) << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Again&Co Tests" tests="1" failures="1" errors="0" time="0">
+  <testsuite name="PHPUnit Execution" tests="1" failures="1" errors="0" time="0">
+    <testcase name="TestExecution" classname="Pipeline">
+      <failure message="PHPUnit execution incomplete" type="ExecutionFailure">
+        PHPUnit did not complete successfully. Check pipeline logs for details.
+      </failure>
+    </testcase>
+  </testsuite>
+</testsuites>
+EOF
+        fi
+      }
+    
+    echo "=== PHPUnit Execution Completed ==="
+    if [ -f "$(junitFile)" ]; then
+      echo "✓ JUnit file created successfully"
+      echo "File size: $(stat -c%s $(junitFile) 2>/dev/null || echo 'unknown') bytes"
+    else
+      echo "✗ JUnit file not found at $(junitFile)"
+    fi
   displayName: 'Run PHPUnit Test Suite'
 
 # Show test summary
 - script: |
-    if [ -f "$(junitPath)" ]; then
+    if [ -f "$(junitFile)" ]; then
       echo "=== TEST RESULTS SUMMARY ==="
       echo "JUnit XML file generated successfully"
-      echo "File size: $(stat -f%z $(junitPath) 2>/dev/null || stat -c%s $(junitPath) 2>/dev/null || echo 'unknown') bytes"
+      echo "File size: $(stat -f%z $(junitFile) 2>/dev/null || stat -c%s $(junitFile) 2>/dev/null || echo 'unknown') bytes"
       echo "File contents preview:"
-      head -20 $(junitPath) || echo "Could not read file"
+      head -20 $(junitFile) || echo "Could not read file"
       echo "Check the Tests tab for detailed results"
     else
-      echo "Warning: JUnit XML file not found at $(junitPath)"
+      echo "Warning: JUnit XML file not found at $(junitFile)"
       echo "Contents of current directory:"
       ls -la
       echo "Contents of test-results directory (if exists):"
@@ -112,16 +164,16 @@ steps:
   condition: succeededOrFailed()
   inputs:
     testResultsFormat: 'JUnit'
-    testResultsFiles: '$(junitPath)'
+    testResultsFiles: '$(junitFile)'
     failTaskOnFailedTests: false
     testRunTitle: 'Again&Co E-commerce Tests'
     publishRunAttachments: true
 
 # Archive test artifacts (only if file exists)
 - script: |
-    if [ -f "$(junitPath)" ]; then
+    if [ -f "$(junitFile)" ]; then
       echo "JUnit file exists, preparing for archive"
-      cp $(junitPath) $(Build.SourcesDirectory)/test-results/
+      cp $(junitFile) $(Build.SourcesDirectory)/test-results/
     else
       echo "JUnit file not found, creating empty test results"
       mkdir -p $(Build.SourcesDirectory)/test-results
