@@ -39,7 +39,7 @@ final class Feature_Checkout_OrderTest extends TestCase
         $tax = 7.20;
         
         $total = $subtotal + $shipping + $tax;
-        $this->assertEquals(107.18, $total, '', 0.01);
+        $this->assertSame(107.18, round($total, 2));
         
         // Test formatted currency
         $formattedTotal = '$' . number_format($total, 2);

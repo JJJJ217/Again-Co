@@ -52,16 +52,20 @@ if (!function_exists('getCartCount')) {
 }
 
 if (!function_exists('calculateShipping')) {
-    function calculateShipping(array $items, string $method, string $country): float {
+    function calculateShipping(array $items, string $method = 'standard', string $country = 'US'): float {
         $totalWeight = 0;
         foreach ($items as $item) {
             $weight = $item['weight'] ?? 1.0;
-            $totalWeight += $item['quantity'] * $weight;
+            $quantity = $item['quantity'] ?? 1;
+            $totalWeight += $quantity * $weight;
         }
         
-        $baseCost = $method === 'express' ? 15.00 : 10.00;
+        // Base costs for different methods
+        $baseCost = ($method === 'express') ? 15.00 : 10.00;
+        $weightCost = $totalWeight * 2.50;
         $countrySurcharge = in_array($country, ['AU', 'UK']) ? 5.00 : 0.00;
-        return $baseCost + ($totalWeight * 2.50) + $countrySurcharge;
+        
+        return $baseCost + $weightCost + $countrySurcharge;
     }
 }
 

@@ -43,11 +43,11 @@ final class Feature_Cart_ShoppingTest extends TestCase
         // Test different quantities
         $item['quantity'] = 1;
         $itemTotal = $item['price'] * $item['quantity'];
-        $this->assertEquals(89.99, $itemTotal, '', 0.01);
+        $this->assertSame(89.99, round($itemTotal, 2));
         
         $item['quantity'] = 3;
         $itemTotal = $item['price'] * $item['quantity'];
-        $this->assertEquals(269.97, $itemTotal, '', 0.01);
+        $this->assertSame(269.97, round($itemTotal, 2));
     }
 
     public function testCartDescriptionToggleLogic(): void
@@ -73,12 +73,13 @@ final class Feature_Cart_ShoppingTest extends TestCase
         $this->assertIsFloat($shippingCost);
         $this->assertGreaterThanOrEqual(0, $shippingCost);
         
-        // Test different shipping methods - should have different costs
+        // Test shipping calculation with mock function
         $standardCost = calculateShipping($items, 'standard', 'US');
         $expressCost = calculateShipping($items, 'express', 'US');
         
-        // Express should cost more than standard (15.00 vs 10.00 base cost)
-        $this->assertNotEquals($standardCost, $expressCost, 'Standard and express shipping should have different costs');
+        // With our mock function: standard = 10 + (2*2.5) = 15, express = 15 + (2*2.5) = 20
+        $this->assertSame(15.0, $standardCost);
+        $this->assertSame(20.0, $expressCost);
         $this->assertGreaterThan($standardCost, $expressCost);
         
         // Test international shipping

@@ -50,7 +50,7 @@ final class Feature_Orders_HistoryTest extends TestCase
         
         // Test order total calculation from notes
         $calculatedTotal = $parsedNotes['subtotal'] + $parsedNotes['shipping_cost'] + $parsedNotes['tax_amount'];
-        $this->assertEquals(107.18, $calculatedTotal, '', 0.01);
+        $this->assertSame(107.18, round($calculatedTotal, 2));
     }
 
     public function testOrderCancellationEligibility(): void
