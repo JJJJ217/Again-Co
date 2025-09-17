@@ -9,13 +9,8 @@ final class FunctionsTest extends TestCase
 {
     protected function tearDown(): void
     {
-        // Clear any session data that might interfere with other tests
-        if (isset($_SESSION['flash_message'])) {
-            unset($_SESSION['flash_message']);
-        }
-        if (isset($_SESSION['flash_type'])) {
-            unset($_SESSION['flash_type']);
-        }
+        reset_session_flash();
+        clear_user_session();
     }
 
     public function testBasicStringOperations(): void
@@ -45,11 +40,37 @@ final class FunctionsTest extends TestCase
         $input = '<script>alert("xss")</script>';
         $expected = '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;';
         $this->assertSame($expected, htmlspecialchars($input, ENT_QUOTES, 'UTF-8'));
+        
+        // Test safeHtml function
+        $this->assertSame('', safeHtml(null));
+        $this->assertSame('&lt;b&gt;', safeHtml('<b>'));
+        $this->assertSame('Default', safeHtml(null, 'Default'));
     }
 
     public function testEmailValidation(): void
     {
         $this->assertTrue(filter_var('test@example.com', FILTER_VALIDATE_EMAIL) !== false);
         $this->assertFalse(filter_var('invalid-email', FILTER_VALIDATE_EMAIL) !== false);
+    }
+
+    public function testFlashMessages(): void
+    {
+        setFlashMessage('Test message', 'success');
+        $this->assertSame('Test message', getFlashMessage());
+        $this->assertNull(getFlashMessage()); // Should be cleared after read
+    }
+
+    public function testSanitizeInput(): void
+    {
+        $this->assertSame('test', sanitizeInput('  test  '));
+        $this->assertSame('hello world', sanitizeInput('hello world'));
+        $this->assertSame('', sanitizeInput(''));
+    }
+
+    public function testFormatCurrency(): void
+    {
+        $this->assertSame('$9.99', formatCurrency(9.99));
+        $this->assertSame('$107.18', formatCurrency(107.18));
+        $this->assertSame('$0.00', formatCurrency(0));
     }
 }

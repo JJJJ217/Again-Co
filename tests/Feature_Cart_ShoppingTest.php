@@ -13,7 +13,7 @@ final class Feature_Cart_ShoppingTest extends TestCase
         unset($_SESSION['user_id']);
     }
 
-    public function test_cart_count_calculation(): void
+    public function testCartCountCalculation(): void
     {
         // Mock user session
         $_SESSION['user_id'] = 1;
@@ -24,7 +24,7 @@ final class Feature_Cart_ShoppingTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $count);
     }
 
-    public function test_cart_item_calculations(): void
+    public function testCartItemCalculations(): void
     {
         // Test cart item total calculation logic
         $item = [
@@ -50,7 +50,7 @@ final class Feature_Cart_ShoppingTest extends TestCase
         $this->assertSame(269.97, $itemTotal);
     }
 
-    public function test_cart_description_toggle_logic(): void
+    public function testCartDescriptionToggleLogic(): void
     {
         // Test description availability check
         $itemWithDescription = ['description' => 'Beautiful vintage jacket from the 1960s'];
@@ -62,7 +62,7 @@ final class Feature_Cart_ShoppingTest extends TestCase
         $this->assertFalse(!empty($itemNullDescription['description']));
     }
 
-    public function test_shipping_calculation(): void
+    public function testShippingCalculation(): void
     {
         $items = [
             ['quantity' => 1, 'weight' => 1.0],
@@ -84,7 +84,7 @@ final class Feature_Cart_ShoppingTest extends TestCase
         $this->assertGreaterThan($domesticCost, $internationalCost);
     }
 
-    public function test_cart_total_calculation(): void
+    public function testCartTotalCalculation(): void
     {
         // Test cart totals calculation
         $cartItems = [
@@ -105,7 +105,7 @@ final class Feature_Cart_ShoppingTest extends TestCase
         $this->assertSame(4, $totalQuantity); // 1 + 2 + 1
     }
 
-    public function test_quantity_validation(): void
+    public function testQuantityValidation(): void
     {
         // Test quantity limits
         $maxStock = 10;
@@ -124,7 +124,7 @@ final class Feature_Cart_ShoppingTest extends TestCase
         $this->assertSame(1, $validQuantity);
     }
 
-    public function test_cart_persistence_logic(): void
+    public function testCartPersistenceLogic(): void
     {
         // Test cart session handling
         $_SESSION['user_id'] = 123;

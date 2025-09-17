@@ -13,7 +13,7 @@ final class Feature_Admin_ManagementTest extends TestCase
         unset($_SESSION['user_id'], $_SESSION['user_role']);
     }
 
-    public function test_admin_role_requirements(): void
+    public function testAdminRoleRequirements(): void
     {
         // Test admin access control
         $_SESSION['user_role'] = 'admin';
@@ -31,7 +31,7 @@ final class Feature_Admin_ManagementTest extends TestCase
         $this->assertFalse(isStaff());
     }
 
-    public function test_user_statistics_calculation(): void
+    public function testUserStatisticsCalculation(): void
     {
         // Test user count logic (simulated)
         $totalUsers = 15;
@@ -46,7 +46,7 @@ final class Feature_Admin_ManagementTest extends TestCase
         $this->assertGreaterThan(0, $adminUsers);
     }
 
-    public function test_product_status_badge_generation(): void
+    public function testProductStatusBadgeGeneration(): void
     {
         // Test status badge function logic
         $statusBadges = [
@@ -61,7 +61,7 @@ final class Feature_Admin_ManagementTest extends TestCase
         $this->assertStringContainsString('Inactive', $statusBadges['inactive']);
     }
 
-    public function test_order_status_display(): void
+    public function testOrderStatusDisplay(): void
     {
         // Test order status mapping
         $orderStatuses = [
@@ -79,7 +79,7 @@ final class Feature_Admin_ManagementTest extends TestCase
         $this->assertStringContainsString('🔴', $orderStatuses['cancelled']);
     }
 
-    public function test_user_role_hierarchy(): void
+    public function testUserRoleHierarchy(): void
     {
         // Test role hierarchy and permissions
         $roleHierarchy = [
@@ -103,7 +103,7 @@ final class Feature_Admin_ManagementTest extends TestCase
         $this->assertFalse($hasPermission);
     }
 
-    public function test_product_condition_types(): void
+    public function testProductConditionTypes(): void
     {
         // Test product condition validation
         $validConditions = ['new', 'like_new', 'good', 'fair'];
@@ -117,7 +117,7 @@ final class Feature_Admin_ManagementTest extends TestCase
         $this->assertFalse(in_array($invalidCondition, $validConditions));
     }
 
-    public function test_stock_level_alerts(): void
+    public function testStockLevelAlerts(): void
     {
         // Test low stock calculation
         $products = [
@@ -143,7 +143,7 @@ final class Feature_Admin_ManagementTest extends TestCase
         $this->assertSame('Old Book', $outOfStockProducts[0]['product_name']);
     }
 
-    public function test_admin_search_functionality(): void
+    public function testAdminSearchFunctionality(): void
     {
         // Test admin search query building
         $searchTerm = 'vintage';

@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class Feature_Products_CatalogTest extends TestCase
 {
-    public function test_product_search_query_building(): void
+    public function testProductSearchQueryBuilding(): void
     {
         // Test search query construction (simulating the logic from catalog.php)
         $searchTerm = 'vintage jacket';
@@ -39,7 +39,7 @@ final class Feature_Products_CatalogTest extends TestCase
         $this->assertSame('Clothing', $params[3]);
     }
 
-    public function test_product_sort_options(): void
+    public function testProductSortOptions(): void
     {
         // Test sort options from our catalog
         $sortOptions = [
@@ -55,7 +55,7 @@ final class Feature_Products_CatalogTest extends TestCase
         $this->assertSame('product_name ASC', $sortOptions['name']);
     }
 
-    public function test_price_range_validation(): void
+    public function testPriceRangeValidation(): void
     {
         // Test price range filtering logic
         $minPrice = '10.00';
@@ -75,7 +75,7 @@ final class Feature_Products_CatalogTest extends TestCase
         $this->assertFalse(is_numeric(''));
     }
 
-    public function test_product_status_filtering(): void
+    public function testProductStatusFiltering(): void
     {
         // Test product status conditions
         $activeOnly = true;
@@ -88,7 +88,7 @@ final class Feature_Products_CatalogTest extends TestCase
         $this->assertSame("is_active = 1", $statusCondition);
     }
 
-    public function test_category_filtering(): void
+    public function testCategoryFiltering(): void
     {
         // Test category options
         $categories = [
@@ -114,7 +114,7 @@ final class Feature_Products_CatalogTest extends TestCase
         $this->assertFalse($shouldFilter);
     }
 
-    public function test_search_term_sanitization(): void
+    public function testSearchTermSanitization(): void
     {
         // Test search term cleaning
         $rawSearch = "  vintage  jacket  ";
@@ -127,7 +127,7 @@ final class Feature_Products_CatalogTest extends TestCase
         $this->assertSame("&lt;script&gt;alert('xss')&lt;/script&gt;", $safeSearch);
     }
 
-    public function test_pagination_calculation(): void
+    public function testPaginationCalculation(): void
     {
         // Test pagination logic
         $totalProducts = 47;

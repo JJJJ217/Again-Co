@@ -71,5 +71,67 @@ if (!function_exists('formatCurrency')) {
     }
 }
 
+if (!function_exists('hasRole')) {
+    function hasRole($roles): bool {
+        if (!isset($_SESSION['user_role'])) {
+            return false;
+        }
+        
+        if (is_array($roles)) {
+            return in_array($_SESSION['user_role'], $roles);
+        }
+        
+        return $_SESSION['user_role'] === $roles;
+    }
+}
+
+if (!function_exists('isAdmin')) {
+    function isAdmin(): bool {
+        return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+    }
+}
+
+if (!function_exists('isStaff')) {
+    function isStaff(): bool {
+        return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'staff';
+    }
+}
+
+if (!function_exists('safeHtml')) {
+    function safeHtml($value, $default = ''): string {
+        if ($value === null || $value === '') {
+            return $default;
+        }
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('setFlashMessage')) {
+    function setFlashMessage(string $message, string $type = 'info'): void {
+        $_SESSION['flash_message'] = $message;
+        $_SESSION['flash_type'] = $type;
+    }
+}
+
+if (!function_exists('getFlashMessage')) {
+    function getFlashMessage(): ?string {
+        if (isset($_SESSION['flash_message'])) {
+            $message = $_SESSION['flash_message'];
+            unset($_SESSION['flash_message'], $_SESSION['flash_type']);
+            return $message;
+        }
+        return null;
+    }
+}
+
+if (!function_exists('sanitizeInput')) {
+    function sanitizeInput($data): string {
+        if (is_array($data)) {
+            return '';
+        }
+        return trim(htmlspecialchars($data, ENT_QUOTES, 'UTF-8'));
+    }
+}
+
 // Initialize test environment
 echo "Test environment initialized for Again&Co E-commerce\n";

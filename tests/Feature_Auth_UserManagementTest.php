@@ -16,7 +16,7 @@ final class Feature_Auth_UserManagementTest extends TestCase
         unset($_SESSION['user_id'], $_SESSION['user_role']);
     }
 
-    public function test_password_hashing_and_verification(): void
+    public function testPasswordHashingAndVerification(): void
     {
         $password = 'SecurePassword123!';
         $hashed = password_hash($password, PASSWORD_DEFAULT);
@@ -26,7 +26,7 @@ final class Feature_Auth_UserManagementTest extends TestCase
         $this->assertNotSame($password, $hashed); // Ensure it's actually hashed
     }
 
-    public function test_role_checking_functions(): void
+    public function testRoleCheckingFunctions(): void
     {
         // Test isAdmin function
         $_SESSION['user_role'] = 'admin';
@@ -48,7 +48,7 @@ final class Feature_Auth_UserManagementTest extends TestCase
         $this->assertFalse(isStaff());
     }
 
-    public function test_has_role_function_with_arrays(): void
+    public function testHasRoleFunctionWithArrays(): void
     {
         $_SESSION['user_role'] = 'admin';
         $this->assertTrue(hasRole(['admin', 'staff']));
@@ -64,7 +64,7 @@ final class Feature_Auth_UserManagementTest extends TestCase
         $this->assertTrue(hasRole(['customer', 'guest']));
     }
 
-    public function test_user_profile_name_splitting(): void
+    public function testUserProfileNameSplitting(): void
     {
         // Test the name splitting logic we implemented for checkout
         $fullName = "Michael Sutjiato";
@@ -94,7 +94,7 @@ final class Feature_Auth_UserManagementTest extends TestCase
         $this->assertSame('Michael Smith', $lastName);
     }
 
-    public function test_email_validation(): void
+    public function testEmailValidation(): void
     {
         // Test email validation patterns
         $validEmails = [
@@ -119,7 +119,7 @@ final class Feature_Auth_UserManagementTest extends TestCase
         }
     }
 
-    public function test_session_management(): void
+    public function testSessionManagement(): void
     {
         // Test session data setting and retrieval
         $_SESSION['user_id'] = 123;

@@ -13,7 +13,7 @@ final class Feature_Checkout_OrderTest extends TestCase
         unset($_SESSION['user_id'], $_SESSION['checkout'], $_SESSION['order_success']);
     }
 
-    public function test_checkout_session_initialization(): void
+    public function testCheckoutSessionInitialization(): void
     {
         // Test checkout session structure
         $checkoutData = [
@@ -31,7 +31,7 @@ final class Feature_Checkout_OrderTest extends TestCase
         $this->assertTrue($checkoutData['billing_same_as_shipping']);
     }
 
-    public function test_order_total_calculation(): void
+    public function testOrderTotalCalculation(): void
     {
         // Test order breakdown calculation
         $subtotal = 89.99;
@@ -51,7 +51,7 @@ final class Feature_Checkout_OrderTest extends TestCase
         $this->assertSame(7.20, $calculatedTax);
     }
 
-    public function test_order_notes_json_parsing(): void
+    public function testOrderNotesJsonParsing(): void
     {
         // Test order notes JSON structure
         $orderData = [
@@ -81,7 +81,7 @@ final class Feature_Checkout_OrderTest extends TestCase
         $this->assertSame('credit_card', $decoded['payment_method']);
     }
 
-    public function test_order_success_tracking(): void
+    public function testOrderSuccessTracking(): void
     {
         // Test order success session tracking
         $_SESSION['order_success'] = [
@@ -98,7 +98,7 @@ final class Feature_Checkout_OrderTest extends TestCase
         $this->assertStringContainsString('successfully', $_SESSION['order_success']['message']);
     }
 
-    public function test_country_options_include_australia(): void
+    public function testCountryOptionsIncludeAustralia(): void
     {
         // Test that Australia is available in country options
         $countries = ['US', 'CA', 'UK', 'AU'];
@@ -114,7 +114,7 @@ final class Feature_Checkout_OrderTest extends TestCase
         $this->assertArrayHasKey('AU', $countryNames);
     }
 
-    public function test_shipping_method_options(): void
+    public function testShippingMethodOptions(): void
     {
         // Test shipping method validation
         $shippingMethods = [
@@ -129,7 +129,7 @@ final class Feature_Checkout_OrderTest extends TestCase
         $this->assertSame('2-3', $shippingMethods['express']['days']);
     }
 
-    public function test_payment_method_validation(): void
+    public function testPaymentMethodValidation(): void
     {
         // Test payment method options
         $paymentMethods = ['credit_card', 'paypal', 'bank_transfer'];
@@ -143,7 +143,7 @@ final class Feature_Checkout_OrderTest extends TestCase
         $this->assertFalse(in_array($invalidMethod, $paymentMethods));
     }
 
-    public function test_address_validation(): void
+    public function testAddressValidation(): void
     {
         // Test address field validation
         $address = [

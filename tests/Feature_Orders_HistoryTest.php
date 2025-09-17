@@ -13,7 +13,7 @@ final class Feature_Orders_HistoryTest extends TestCase
         unset($_SESSION['user_id']);
     }
 
-    public function test_order_detail_display(): void
+    public function testOrderDetailDisplay(): void
     {
         // Test order item structure
         $orderItem = [
@@ -35,7 +35,7 @@ final class Feature_Orders_HistoryTest extends TestCase
         $this->assertSame(119.97, $orderItem['total_price']);
     }
 
-    public function test_order_notes_breakdown(): void
+    public function testOrderNotesBreakdown(): void
     {
         // Test order notes parsing for better display
         $rawNotes = '{"subtotal":89.99,"shipping_cost":9.99,"tax_amount":7.20,"shipping_method":"standard","payment_method":"credit_card"}';
@@ -53,7 +53,7 @@ final class Feature_Orders_HistoryTest extends TestCase
         $this->assertSame(107.18, $calculatedTotal);
     }
 
-    public function test_order_cancellation_eligibility(): void
+    public function testOrderCancellationEligibility(): void
     {
         // Test order cancellation logic
         $pendingOrder = ['status' => 'pending', 'order_date' => date('Y-m-d H:i:s')];
@@ -74,7 +74,7 @@ final class Feature_Orders_HistoryTest extends TestCase
         $this->assertFalse($canCancelDelivered);
     }
 
-    public function test_empty_orders_display(): void
+    public function testEmptyOrdersDisplay(): void
     {
         // Test empty state handling
         $orders = [];
@@ -91,7 +91,7 @@ final class Feature_Orders_HistoryTest extends TestCase
         $this->assertTrue($hasOrders);
     }
 
-    public function test_order_status_progression(): void
+    public function testOrderStatusProgression(): void
     {
         // Test order status workflow
         $statusFlow = [
@@ -113,7 +113,7 @@ final class Feature_Orders_HistoryTest extends TestCase
         $this->assertEmpty($allowedNextStatuses);
     }
 
-    public function test_order_date_formatting(): void
+    public function testOrderDateFormatting(): void
     {
         // Test date formatting for order display
         $orderDate = '2025-09-17 14:30:25';
@@ -128,7 +128,7 @@ final class Feature_Orders_HistoryTest extends TestCase
         $this->assertSame('Sep 17, 2025 at 2:30 PM', $formattedDateTime);
     }
 
-    public function test_order_search_functionality(): void
+    public function testOrderSearchFunctionality(): void
     {
         // Test order search logic
         $searchTerm = '#ORD-123';
@@ -150,7 +150,7 @@ final class Feature_Orders_HistoryTest extends TestCase
         $this->assertSame(123, $filteredOrders[0]['order_id']);
     }
 
-    public function test_order_item_aggregation(): void
+    public function testOrderItemAggregation(): void
     {
         // Test order item summary calculation
         $orderItems = [
