@@ -104,29 +104,19 @@ steps:
     find tests -name "*.php" -type f | head -10
     
     echo "=== Starting PHPUnit Execution ==="
-    # Run PHPUnit with explicit output and better error handling
-    vendor/bin/phpunit \
-      --configuration phpunit.xml \
-      --log-junit $(junitFile) \
-      --testdox \
-      --verbose || {
-        echo "PHPUnit execution completed with some failures (exit code $?)"
-        echo "Checking if any test results were generated..."
-        
+    # Run PHPUnit with error handling
+    vendor/bin/phpunit --configuration phpunit.xml --log-junit $(junitFile) --testdox --verbose || {
+        echo "PHPUnit execution completed with exit code $?"
         if [ ! -f "$(junitFile)" ]; then
           echo "Creating fallback JUnit XML file..."
-          cat > $(junitFile) << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Again&Co Tests" tests="1" failures="1" errors="0" time="0">
-  <testsuite name="PHPUnit Execution" tests="1" failures="1" errors="0" time="0">
-    <testcase name="TestExecution" classname="Pipeline">
-      <failure message="PHPUnit execution incomplete" type="ExecutionFailure">
-        PHPUnit did not complete successfully. Check pipeline logs for details.
-      </failure>
-    </testcase>
-  </testsuite>
-</testsuites>
-EOF
+          printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' > $(junitFile)
+          printf '%s\n' '<testsuites name="Again&Co Tests" tests="1" failures="1">' >> $(junitFile)
+          printf '%s\n' '  <testsuite name="Execution" tests="1" failures="1">' >> $(junitFile)
+          printf '%s\n' '    <testcase name="PHPUnit" classname="Pipeline">' >> $(junitFile)
+          printf '%s\n' '      <failure message="Execution failed">Check logs</failure>' >> $(junitFile)
+          printf '%s\n' '    </testcase>' >> $(junitFile)
+          printf '%s\n' '  </testsuite>' >> $(junitFile)
+          printf '%s\n' '</testsuites>' >> $(junitFile)
         fi
       }
     
