@@ -19,7 +19,6 @@ pool:
 variables:
   phpVersion: '8.2'
   junitPath: '$(Build.SourcesDirectory)/junit.xml'
-  coveragePath: '$(Build.SourcesDirectory)/coverage.xml'
 
 steps:
 - checkout: self
@@ -48,12 +47,8 @@ steps:
 
 # Run comprehensive PHPUnit test suite
 - script: |
-    echo "Testing PHPUnit configuration..."
-    vendor/bin/phpunit --version
-    echo "Validating test configuration..."
-    php -l phpunit.xml
-    echo "Running test suite..."
-    vendor/bin/phpunit --log-junit $(junitPath) --coverage-clover $(coveragePath) --verbose
+    echo "Running PHPUnit test suite..."
+    vendor/bin/phpunit --log-junit $(junitPath)
   displayName: 'Run PHPUnit Test Suite'
 
 # Publish JUnit results to Azure Pipelines Tests tab
@@ -64,14 +59,6 @@ steps:
     testResultsFiles: '$(junitPath)'
     failTaskOnFailedTests: true
     testRunTitle: 'Again&Co E-commerce Tests'
-
-# Publish code coverage results
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage'
-  inputs:
-    codeCoverageTool: 'Cobertura'
-    summaryFileLocation: '$(coveragePath)'
-    reportDirectory: '$(Build.SourcesDirectory)/coverage'
 
 # Archive test artifacts
 - task: PublishBuildArtifacts@1
