@@ -27,9 +27,12 @@ steps:
 # Install PHP and required extensions
 - script: |
     sudo apt-get update
-    sudo apt-get install -y php php-xml php-mbstring php-curl php-zip php-sqlite3 php-mysql
+    sudo apt-get install -y software-properties-common
+    sudo add-apt-repository ppa:ondrej/php -y
+    sudo apt-get update
+    sudo apt-get install -y php8.2 php8.2-cli php8.2-xml php8.2-mbstring php8.2-curl php8.2-zip php8.2-sqlite3 php8.2-mysql php8.2-xdebug
     php -v
-    php -m
+    php -m | grep -E "(xml|mbstring|curl|zip)"
   displayName: 'Install PHP + extensions'
 
 # Install Composer
@@ -45,7 +48,12 @@ steps:
 
 # Run comprehensive PHPUnit test suite
 - script: |
-    vendor/bin/phpunit --log-junit $(junitPath) --coverage-clover $(coveragePath) || exit 1
+    echo "Testing PHPUnit configuration..."
+    vendor/bin/phpunit --version
+    echo "Validating test configuration..."
+    php -l phpunit.xml
+    echo "Running test suite..."
+    vendor/bin/phpunit --log-junit $(junitPath) --coverage-clover $(coveragePath) --verbose
   displayName: 'Run PHPUnit Test Suite'
 
 # Publish JUnit results to Azure Pipelines Tests tab

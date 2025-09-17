@@ -2,16 +2,15 @@
 <phpunit bootstrap="tests/bootstrap.php" 
          colors="true" 
          cacheResult="false"
-         testdox="true">
+         testdox="true"
+         beStrictAboutOutputDuringTests="false"
+         beStrictAboutTodoAnnotatedTests="false">
   <testsuites>
-    <testsuite name="Again&Co Test Suite">
+    <testsuite name="AgainCo Test Suite">
       <directory>tests</directory>
     </testsuite>
   </testsuites>
-  <coverage>
-    <include>
-      <directory suffix=".php">includes</directory>
-      <directory suffix=".php">pages</directory>
-    </include>
-  </coverage>
+  <logging>
+    <junit outputFile="junit.xml"/>
+  </logging>
 </phpunit>
