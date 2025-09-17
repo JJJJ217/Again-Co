@@ -15,20 +15,23 @@ final class Feature_Admin_ManagementTest extends TestCase
 
     public function testAdminRoleRequirements(): void
     {
+        // Clear and initialize session
+        $_SESSION = [];
+        
         // Test admin access control
         $_SESSION['user_role'] = 'admin';
-        $this->assertTrue(hasRole(['admin']));
-        $this->assertTrue(isAdmin());
+        $this->assertTrue(hasRole(['admin']), 'hasRole should return true for admin');
+        $this->assertTrue(isAdmin(), 'isAdmin should return true for admin role');
         
         $_SESSION['user_role'] = 'staff';
-        $this->assertTrue(hasRole(['admin', 'staff']));
-        $this->assertFalse(isAdmin());
-        $this->assertTrue(isStaff());
+        $this->assertTrue(hasRole(['admin', 'staff']), 'hasRole should return true for staff in admin/staff array');
+        $this->assertFalse(isAdmin(), 'isAdmin should return false for staff role');
+        $this->assertTrue(isStaff(), 'isStaff should return true for staff role');
         
         $_SESSION['user_role'] = 'customer';
-        $this->assertFalse(hasRole(['admin']));
-        $this->assertFalse(isAdmin());
-        $this->assertFalse(isStaff());
+        $this->assertFalse(hasRole(['admin']), 'hasRole should return false for customer with admin requirement');
+        $this->assertFalse(isAdmin(), 'isAdmin should return false for customer role');
+        $this->assertFalse(isStaff(), 'isStaff should return false for customer role');
     }
 
     public function testUserStatisticsCalculation(): void

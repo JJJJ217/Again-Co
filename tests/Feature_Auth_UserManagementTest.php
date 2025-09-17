@@ -28,15 +28,15 @@ final class Feature_Auth_UserManagementTest extends TestCase
 
     public function testRoleCheckingFunctions(): void
     {
-        // Clear session first
+        // Clear and initialize session
         $_SESSION = [];
         
         // Test isAdmin function
         $_SESSION['user_role'] = 'admin';
-        $this->assertTrue(isAdmin());
+        $this->assertTrue(isAdmin(), 'isAdmin should return true for admin role');
         
         $_SESSION['user_role'] = 'customer';
-        $this->assertFalse(isAdmin());
+        $this->assertFalse(isAdmin(), 'isAdmin should return false for customer role');
         
         // Test isStaff function
         $_SESSION['user_role'] = 'staff';
@@ -53,16 +53,16 @@ final class Feature_Auth_UserManagementTest extends TestCase
 
     public function testHasRoleFunctionWithArrays(): void
     {
-        // Clear session first
+        // Clear and initialize session
         $_SESSION = [];
         
         $_SESSION['user_role'] = 'admin';
-        $this->assertTrue(hasRole(['admin', 'staff']));
-        $this->assertTrue(hasRole('admin'));
+        $this->assertTrue(hasRole(['admin', 'staff']), 'hasRole should return true for admin in admin/staff array');
+        $this->assertTrue(hasRole('admin'), 'hasRole should return true for exact admin match');
         
         $_SESSION['user_role'] = 'staff';
-        $this->assertTrue(hasRole(['admin', 'staff']));
-        $this->assertTrue(hasRole('staff'));
+        $this->assertTrue(hasRole(['admin', 'staff']), 'hasRole should return true for staff in admin/staff array');
+        $this->assertTrue(hasRole('staff'), 'hasRole should return true for exact staff match');
         
         $_SESSION['user_role'] = 'customer';
         $this->assertFalse(hasRole(['admin', 'staff']));

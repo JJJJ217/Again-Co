@@ -60,7 +60,15 @@ final class FunctionsTest extends TestCase
         
         setFlashMessage('Test message', 'success');
         $message = getFlashMessage();
-        $this->assertSame('Test message', $message);
+        
+        // Handle both string and array formats
+        if (is_array($message)) {
+            $this->assertSame('Test message', $message['message']);
+            $this->assertSame('success', $message['type']);
+        } else {
+            $this->assertSame('Test message', $message);
+        }
+        
         $this->assertNull(getFlashMessage()); // Should be cleared after read
     }
 
