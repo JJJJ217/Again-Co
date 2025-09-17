@@ -19,12 +19,17 @@ function isLoggedIn() {
 /**
  * Check if user has specific role
  */
-function hasRole($required_role) {
+function hasRole($required_roles) {
     if (!isLoggedIn()) {
         return false;
     }
     
     $user_role = $_SESSION['user_role'];
+    
+    // Convert single role to array for consistency
+    if (is_string($required_roles)) {
+        $required_roles = [$required_roles];
+    }
     
     // Admin has access to everything
     if ($user_role === 'admin') {
@@ -32,12 +37,12 @@ function hasRole($required_role) {
     }
     
     // Staff has access to staff and customer areas
-    if ($user_role === 'staff' && in_array($required_role, ['staff', 'customer'])) {
+    if ($user_role === 'staff' && (in_array('staff', $required_roles) || in_array('customer', $required_roles))) {
         return true;
     }
     
     // Customer only has access to customer area
-    return $user_role === $required_role;
+    return $user_role === 'customer' && in_array('customer', $required_roles);
 }
 
 /**
@@ -53,13 +58,34 @@ function requireLogin() {
 /**
  * Require specific role - redirect if insufficient permissions
  */
-function requireRole($required_role) {
+function requireRole($required_roles) {
     requireLogin();
     
-    if (!hasRole($required_role)) {
-        header('Location: ' . SITE_URL . '/pages/error/403.php');
-        exit();
+    // Convert single role to array for consistency
+    if (is_string($required_roles)) {
+        $required_roles = [$required_roles];
     }
+    
+    $user_role = $_SESSION['user_role'];
+    
+    // Admin has access to everything
+    if ($user_role === 'admin') {
+        return;
+    }
+    
+    // Staff has access if explicitly allowed
+    if ($user_role === 'staff' && in_array('staff', $required_roles)) {
+        return;
+    }
+    
+    // Customer has access if explicitly allowed
+    if ($user_role === 'customer' && in_array('customer', $required_roles)) {
+        return;
+    }
+    
+    // No access - redirect to error page
+    header('Location: ' . SITE_URL . '/pages/error/403.php');
+    exit();
 }
 
 /**
