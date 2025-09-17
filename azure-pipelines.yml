@@ -1,26 +1,74 @@
-# PHP
-# Test and package your PHP project.
-# Add steps that run tests, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/php
+# Again&Co E-commerce PHP Testing Pipeline
+# Test and package your PHP project with comprehensive testing
+# Automated testing for all features: Authentication, Cart, Checkout, Admin, etc.
 
 trigger:
-- main
+  branches:
+    include:
+      - main
+      - develop
+
+pr:
+  branches:
+    include:
+      - '*'
 
 pool:
   vmImage: ubuntu-latest
 
 variables:
-  phpVersion: 8.1
+  phpVersion: '8.2'
+  junitPath: '$(Build.SourcesDirectory)/junit.xml'
+  coveragePath: '$(Build.SourcesDirectory)/coverage.xml'
 
 steps:
-- script: |
-    sudo update-alternatives --set php /usr/bin/php$(phpVersion)
-    sudo update-alternatives --set phar /usr/bin/phar$(phpVersion)
-    sudo update-alternatives --set phpdbg /usr/bin/phpdbg$(phpVersion)
-    sudo update-alternatives --set php-cgi /usr/bin/php-cgi$(phpVersion)
-    sudo update-alternatives --set phar.phar /usr/bin/phar.phar$(phpVersion)
-    php -version
-  displayName: 'Use PHP version $(phpVersion)'
+- checkout: self
 
-- script: composer install --no-interaction --prefer-dist
-  displayName: 'composer install'
+# Install PHP and required extensions
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y php php-xml php-mbstring php-curl php-zip php-sqlite3 php-mysql
+    php -v
+    php -m
+  displayName: 'Install PHP + extensions'
+
+# Install Composer
+- script: |
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    composer --version
+  displayName: 'Install Composer'
+
+# Install project dependencies
+- script: composer install --no-interaction --no-progress
+  displayName: 'Composer install dependencies'
+
+# Run comprehensive PHPUnit test suite
+- script: |
+    vendor/bin/phpunit --log-junit $(junitPath) --coverage-clover $(coveragePath) || exit 1
+  displayName: 'Run PHPUnit Test Suite'
+
+# Publish JUnit results to Azure Pipelines Tests tab
+- task: PublishTestResults@2
+  displayName: 'Publish test results'
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '$(junitPath)'
+    failTaskOnFailedTests: true
+    testRunTitle: 'Again&Co E-commerce Tests'
+
+# Publish code coverage results
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage'
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: '$(coveragePath)'
+    reportDirectory: '$(Build.SourcesDirectory)/coverage'
+
+# Archive test artifacts
+- task: PublishBuildArtifacts@1
+  displayName: 'Archive test results'
+  inputs:
+    PathtoPublish: '$(Build.SourcesDirectory)/junit.xml'
+    ArtifactName: 'test-results'
+    publishLocation: 'Container'
