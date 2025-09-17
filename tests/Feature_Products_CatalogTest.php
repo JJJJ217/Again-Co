@@ -134,15 +134,15 @@ final class Feature_Products_CatalogTest extends TestCase
         $itemsPerPage = 12;
         $currentPage = 2;
         
-        $totalPages = ceil($totalProducts / $itemsPerPage);
+        $totalPages = (int)ceil($totalProducts / $itemsPerPage);
         $offset = ($currentPage - 1) * $itemsPerPage;
         
         $this->assertSame(4, $totalPages); // 47/12 = 3.9, ceil = 4
         $this->assertSame(12, $offset); // (2-1) * 12 = 12
         
         // Test edge cases
-        $this->assertSame(1, ceil(1 / 12));
-        $this->assertSame(1, ceil(12 / 12));
-        $this->assertSame(2, ceil(13 / 12));
+        $this->assertSame(1, (int)ceil(1 / 12));
+        $this->assertSame(1, (int)ceil(12 / 12));
+        $this->assertSame(2, (int)ceil(13 / 12));
     }
 }
