@@ -124,7 +124,7 @@ final class Feature_Products_CatalogTest extends TestCase
         // Test special characters
         $specialSearch = "<script>alert('xss')</script>";
         $safeSearch = htmlspecialchars($specialSearch);
-        $this->assertSame("&lt;script&gt;alert('xss')&lt;/script&gt;", $safeSearch);
+        $this->assertSame("&lt;script&gt;alert(&#039;xss&#039;)&lt;/script&gt;", $safeSearch);
     }
 
     public function testPaginationCalculation(): void

@@ -28,6 +28,9 @@ final class Feature_Auth_UserManagementTest extends TestCase
 
     public function testRoleCheckingFunctions(): void
     {
+        // Clear session first
+        $_SESSION = [];
+        
         // Test isAdmin function
         $_SESSION['user_role'] = 'admin';
         $this->assertTrue(isAdmin());
@@ -50,6 +53,9 @@ final class Feature_Auth_UserManagementTest extends TestCase
 
     public function testHasRoleFunctionWithArrays(): void
     {
+        // Clear session first
+        $_SESSION = [];
+        
         $_SESSION['user_role'] = 'admin';
         $this->assertTrue(hasRole(['admin', 'staff']));
         $this->assertTrue(hasRole('admin'));

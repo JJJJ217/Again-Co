@@ -55,8 +55,12 @@ final class FunctionsTest extends TestCase
 
     public function testFlashMessages(): void
     {
+        // Clear any existing session data
+        $_SESSION = [];
+        
         setFlashMessage('Test message', 'success');
-        $this->assertSame('Test message', getFlashMessage());
+        $message = getFlashMessage();
+        $this->assertSame('Test message', $message);
         $this->assertNull(getFlashMessage()); // Should be cleared after read
     }
 
