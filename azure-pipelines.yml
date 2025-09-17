@@ -109,7 +109,7 @@ steps:
 # Publish JUnit results to Azure Pipelines Tests tab
 - task: PublishTestResults@2
   displayName: 'Publish test results'
-  condition: and(always(), succeeded('Run PHPUnit Test Suite'))
+  condition: succeededOrFailed()
   inputs:
     testResultsFormat: 'JUnit'
     testResultsFiles: '$(junitPath)'
