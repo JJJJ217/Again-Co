@@ -60,9 +60,20 @@ steps:
 # Test PHPUnit setup
 - script: |
     echo "Testing PHPUnit setup..."
-    php -c tests/bootstrap.php -r "echo 'Bootstrap file loaded successfully\n';" || echo "Bootstrap error"
+    php tests/bootstrap.php || echo "Bootstrap file has issues"
     vendor/bin/phpunit --version || echo "PHPUnit version check failed"
+    
+    # Try to run PHPUnit without any logging first
+    echo "Testing basic PHPUnit execution..."
     vendor/bin/phpunit --list-tests || echo "Test discovery failed"
+    
+    # Try running just the basic test first
+    echo "Testing basic test file execution..."
+    vendor/bin/phpunit tests/BasicTest.php --verbose || echo "Basic test failed"
+    
+    # Try running just one existing test file to isolate issues
+    echo "Testing existing test file execution..."
+    vendor/bin/phpunit tests/FunctionsTest.php --verbose || echo "Functions test file failed"
   displayName: 'Verify PHPUnit Setup'
 
 # Run comprehensive PHPUnit test suite
@@ -71,20 +82,43 @@ steps:
     echo "Current directory: $(pwd)"
     echo "PHP version: $(php --version)"
     echo "Composer version: $(composer --version)"
-    ls -la vendor/bin/ || echo "vendor/bin not found"
+    
+    # Check if vendor/bin/phpunit exists
+    if [ -f "vendor/bin/phpunit" ]; then
+      echo "PHPUnit found at vendor/bin/phpunit"
+      vendor/bin/phpunit --version
+    else
+      echo "PHPUnit not found in vendor/bin/"
+      ls -la vendor/bin/ || echo "vendor/bin directory not found"
+      exit 1
+    fi
     
     # Create test results directory if it doesn't exist
     mkdir -p $(Build.SourcesDirectory)/test-results
     
-    # Run PHPUnit with detailed output
-    if [ -f "vendor/bin/phpunit" ]; then
-      vendor/bin/phpunit --log-junit $(junitPath) --testdox --verbose || echo "PHPUnit completed with some failures"
+    # Check phpunit.xml configuration
+    if [ -f "phpunit.xml" ]; then
+      echo "PHPUnit configuration found:"
+      cat phpunit.xml
     else
-      echo "PHPUnit not found in vendor/bin/"
-      exit 1
+      echo "PHPUnit configuration not found"
     fi
     
-    echo "PHPUnit execution completed. Check test results below."
+    # Check test files exist
+    echo "Available test files:"
+    ls -la tests/*.php || echo "No test files found"
+    
+    # Run PHPUnit with maximum verbosity and error reporting
+    echo "Starting PHPUnit execution..."
+    vendor/bin/phpunit --log-junit $(junitPath) --testdox --verbose --debug || {
+      echo "PHPUnit failed with exit code $?"
+      echo "Checking if partial results were generated..."
+      ls -la $(junitPath) || echo "No JUnit file generated"
+    }
+    
+    echo "PHPUnit execution completed."
+    echo "Checking for generated files:"
+    ls -la *.xml || echo "No XML files found in root"
   displayName: 'Run PHPUnit Test Suite'
 
 # Show test summary
@@ -102,6 +136,22 @@ steps:
       ls -la
       echo "Contents of test-results directory (if exists):"
       ls -la test-results/ || echo "test-results directory not found"
+      
+      # Create a minimal JUnit XML file so we have something to publish
+      echo "Creating minimal JUnit XML file for reporting..."
+      cat > $(junitPath) << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Again&Co E-commerce Tests" tests="1" failures="1" errors="0" time="0">
+  <testsuite name="Setup" tests="1" failures="1" errors="0" time="0">
+    <testcase name="PHPUnit Execution" classname="Setup">
+      <failure message="PHPUnit failed to run or generate results" type="SetupFailure">
+        PHPUnit execution failed. Check pipeline logs for details.
+      </failure>
+    </testcase>
+  </testsuite>
+</testsuites>
+EOF
+      echo "Minimal JUnit XML created at $(junitPath)"
     fi
   displayName: 'Display Test Summary'
   condition: always()
