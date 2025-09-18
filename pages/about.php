@@ -2,6 +2,8 @@
 /**
  * About Page
  * Information about Again&Co vintage store
+ * hello
+ * nlfjselkf
  */
 
 require_once '../includes/init.php';
@@ -11,7 +13,7 @@ $page_description = "Learn about Again&Co's story, our passion for vintage items
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
